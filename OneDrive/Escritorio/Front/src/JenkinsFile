@@ -1,0 +1,91 @@
+pipeline {
+    agent any
+
+    tools {
+        dockerTool 'Docker'
+    }
+
+    stages {
+        stage('Clone and Checkout Latest Commit') {
+            steps {
+                git branch: 'develop', url: 'https://github.com/Jd1ego/EstudioCine'
+                sh 'git fetch --all'
+                sh 'git reset --hard origin/develop'
+            }
+        }
+
+        stage('Prevent Direct Commit to Master') {
+            when {
+                branch 'master'
+            }
+            steps {
+                error 'No se permite realizar commits directamente sobre la rama master'
+            }
+        }
+
+        stage('Set Permissions') {
+            steps {
+                dir('frontend') {
+                    sh 'chmod +x npm'
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('Front') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Build React App') {
+            steps {
+                dir('Front') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def dockerImageTag = "jsebas656/estudio-cine-front:latest" // Etiqueta de la imagen
+                    sh "docker build -t ${dockerImageTag} -f Front/Dockerfile "
+                }
+            }
+        }
+
+        stage('Trivy Vulnerability Scan') {
+            steps {
+                script {
+                    def dockerImageTag = "jsebas656/estudio-cine-front:latest"
+                    sh """
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v $HOME/Library/Caches:/root/.cache/ \
+                      aquasec/trivy image --severity HIGH,CRITICAL \
+                      ${dockerImageTag}
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    def dockerImageTag = "jsebas656/estudio-cine-front:latest"
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-credenciales') {
+                        sh "docker push ${dockerImageTag}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
+}
