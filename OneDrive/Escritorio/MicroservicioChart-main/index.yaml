@@ -3,7 +3,7 @@ entries:
   microservicio-chart:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2025-02-24T08:52:12.2034073-05:00"
+    created: "2025-02-24T08:53:16.5800532-05:00"
     description: A Helm chart for Kubernetes
     digest: c293d99aff7b2547e38698d981f33bb869e362ab2e7dd0bdfc798f8bce348bca
     name: microservicio-chart
@@ -11,4 +11,4 @@ entries:
     urls:
     - microservicio-chart-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-24T08:52:12.1998416-05:00"
+generated: "2025-02-24T08:53:16.5794093-05:00"
