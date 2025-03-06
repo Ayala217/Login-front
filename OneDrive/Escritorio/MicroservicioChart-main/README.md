@@ -1,2 +1,0 @@
-﻿# MicroservicioChart
-·Prueba 1
